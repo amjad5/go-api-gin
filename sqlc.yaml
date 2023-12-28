@@ -1,0 +1,15 @@
+version: "2"
+cloud:
+  # Replace <PROJECT_ID> with your project ID from the sqlc Cloud dashboard
+  project: '01HJRZBHBXYV7NX6029ZHX0KJH'
+sql:
+  - engine: "postgresql"
+    queries: "query.sql"
+    schema: "schema.sql"
+    # database:
+    #   managed: true
+    gen:
+      go:
+        package: "user"
+        out: "user"
+        sql_package: "pgx/v5"
