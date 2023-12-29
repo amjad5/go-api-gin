@@ -1,10 +1,8 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"math/rand"
 	"net/http"
 	"time"
@@ -27,18 +25,6 @@ type OtpPost struct {
 type OtpPostVerify struct {
 	PhoneNumber string `json:"phone_number"`
 	Otp         string `json:"otp"`
-}
-
-func run() error {
-	ctx := context.Background()
-
-	conn, err := pgx.Connect(ctx, getDbConnectionString())
-	if err != nil {
-		return err
-	}
-	defer conn.Close(ctx)
-
-	return nil
 }
 
 func postUser(c *gin.Context) {
@@ -146,14 +132,14 @@ func verifyOtp(c *gin.Context) {
 	})
 
 	if err2 != nil {
-		c.AbortWithStatusJSON(404, "Phone number not found"+err2.Error())
+		c.AbortWithStatusJSON(404, "Phone number or otp not found")
 		return
 	}
 
 	if (record.OtpExpirationTime).Time.After(time.Now().UTC()) {
 		c.IndentedJSON(http.StatusOK, "otp is valid")
 	} else if (record.OtpExpirationTime).Time.Before(time.Now()) {
-		c.AbortWithStatusJSON(404, "Otp has expired "+err2.Error())
+		c.AbortWithStatusJSON(404, "Otp has expired ")
 		return
 	} else {
 		c.IndentedJSON(http.StatusOK, "otp is valid")
@@ -167,9 +153,6 @@ func getDbConnectionString() string {
 func main() {
 	router := gin.Default()
 
-	if err := run(); err != nil {
-		log.Fatal(err)
-	}
 	router.POST("/api/users/generateotp", generateOtp)
 	router.POST("/api/users/verifyotp", verifyOtp)
 	router.POST("/api/users", postUser)
